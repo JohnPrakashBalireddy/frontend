@@ -6,9 +6,8 @@ yarn-error.log
 # Build artifacts (will be rebuilt)
 dist/
 
-# Source files (not needed in production)
+# Cache
 .angular/
-src/
 
 # Environment files
 .env
@@ -25,9 +24,6 @@ src/
 .DS_Store
 Thumbs.db
 
-# Testing
-karma.conf.js
-tsconfig.spec.json
 
 # Git
 .git/
