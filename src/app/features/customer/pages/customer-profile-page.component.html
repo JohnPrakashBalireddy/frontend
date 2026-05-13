@@ -1,0 +1,48 @@
+<main class="screen">
+  <app-header title="Profile & Notifications" subtitle="Recent activity and account details"></app-header>
+
+  <div *ngIf="error" class="error-banner" role="alert">{{ error }}</div>
+
+  <section class="profile-card card" *ngIf="authService.sessionSnapshot?.user as user">
+    <div class="profile-meta">
+      <h3>{{ user.fullName }}</h3>
+      <p class="muted">{{ user.email || 'No email on file' }} · {{ user.mobile }} · {{ user.city }}</p>
+      <div class="profile-tags">
+        <span class="tag">{{ user.role }}</span>
+        <span class="tag">{{ user.city }}</span>
+      </div>
+    </div>
+    <button type="button" class="logout-btn" (click)="onLogout()">Sign out</button>
+  </section>
+
+  <section class="card details-card" *ngIf="authService.sessionSnapshot?.user as user">
+    <h3>Account details</h3>
+    <div class="details-grid">
+      <div class="detail-item">
+        <span class="label">Full name</span>
+        <strong>{{ user.fullName }}</strong>
+      </div>
+      <div class="detail-item">
+        <span class="label">Email</span>
+        <strong>{{ user.email || 'Not provided' }}</strong>
+      </div>
+      <div class="detail-item">
+        <span class="label">Mobile</span>
+        <strong>{{ user.mobile }}</strong>
+      </div>
+      <div class="detail-item">
+        <span class="label">City</span>
+        <strong>{{ user.city }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <app-mail-inbox
+    heading="Customer mail"
+    title="Requirements, offers and OTP updates"
+    subtitle="This inbox mirrors the mail triggered by posting requirements, accepting offers and OTP verification."
+    emptyTitle="No customer notifications yet"
+    emptyMessage="Create a requirement or respond to an offer to see mail-triggered updates here."
+    [notifications]="notifications"
+  ></app-mail-inbox>
+</main>

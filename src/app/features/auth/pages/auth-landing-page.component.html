@@ -1,0 +1,114 @@
+<main class="auth-layout">
+  <section class="auth-shell">
+    <aside class="brand-panel" aria-hidden="true">
+      <img src="/applogo.jpg" alt="RideOnDemand logo" class="brand-logo" />
+      <h1>Ride On Demand</h1>
+      <p>Fast role-based onboarding with secure OTP verification.</p>
+
+      <div class="feature-list">
+        <span>Quick sign in</span>
+        <span>Role aware access</span>
+        <span>Instant redirect</span>
+      </div>
+    </aside>
+
+    <section class="panel" aria-label="Authentication form">
+      <header class="panel-head">
+        <p class="eyebrow">Welcome</p>
+        <h2>{{ step() === 'otp' ? 'Verify OTP' : (mode() === 'register' ? 'Create your account' : 'Sign in with OTP') }}</h2>
+      </header>
+
+      <div class="role-grid" aria-label="Select role">
+        <button
+          *ngFor="let role of roles"
+          type="button"
+          [class.active]="selectedRole() === role"
+          (click)="selectRole(role)"
+        >
+          {{ roleLabels[role] }}
+        </button>
+      </div>
+
+      <div class="mode-toggle" aria-label="Select mode">
+        <button type="button" [class.active]="mode() === 'register'" (click)="setMode('register')">Register</button>
+        <button type="button" [class.active]="mode() === 'login'" (click)="setMode('login')">Login</button>
+      </div>
+
+      <p *ngIf="toastMsg()" class="toastmsg" role="alert">{{ toastMsg() }}</p>
+
+      <form *ngIf="step() === 'register'" [formGroup]="registerForm" class="form-stack">
+        <label *ngIf="mode() === 'register'">
+          <span>Full name</span>
+          <input formControlName="fullName" />
+          <small class="field-error" *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.hasError('required')">
+            Full name is required.
+          </small>
+          <small class="field-error" *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.hasError('minlength')">
+            Full name must be at least 2 characters.
+          </small>
+        </label>
+
+        <label *ngIf="mode() === 'register'">
+          <span>Email</span>
+          <input type="email" formControlName="email" placeholder="name@example.com" />
+          <small class="field-error" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')">
+            Email is required.
+          </small>
+          <small class="field-error" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')">
+            Enter a valid email address.
+          </small>
+        </label>
+
+        <label>
+          <span>Mobile</span>
+          <input formControlName="mobile" />
+          <small class="field-error" *ngIf="registerForm.get('mobile')?.touched && registerForm.get('mobile')?.hasError('required')">
+            Mobile number is required.
+          </small>
+          <small class="field-error" *ngIf="registerForm.get('mobile')?.touched && registerForm.get('mobile')?.hasError('minlength')">
+            Mobile number must be at least 10 digits.
+          </small>
+        </label>
+
+        <label *ngIf="mode() === 'register'">
+          <span>City</span>
+          <input formControlName="city" />
+          <small class="field-error" *ngIf="registerForm.get('city')?.touched && registerForm.get('city')?.hasError('required')">
+            City is required.
+          </small>
+        </label>
+
+        <label *ngIf="mode() === 'register' && selectedRole() === Role.Vendor">
+          <span>Shop name</span>
+          <input formControlName="shopName" />
+        </label>
+
+        <p *ngIf="mode() === 'register'" class="register-note">
+          Registration emails, OTPs, and role-based notifications are sent to this address.
+        </p>
+
+        <button class="primary-btn" type="button" [disabled]="loading()" (click)="sendOtp()">
+          {{ mode() === 'register' ? 'Register & Send OTP' : 'Send OTP' }}
+        </button>
+      </form>
+
+      <form *ngIf="step() === 'otp'" [formGroup]="otpForm" class="form-stack otp-stack">
+        <label>
+          <span>Enter OTP</span>
+          <input formControlName="otp" maxlength="6" />
+          <small class="field-error" *ngIf="otpForm.get('otp')?.touched && otpForm.get('otp')?.hasError('required')">
+            OTP is required.
+          </small>
+          <small class="field-error" *ngIf="otpForm.get('otp')?.touched && (otpForm.get('otp')?.hasError('minlength') || otpForm.get('otp')?.hasError('maxlength'))">
+            OTP must be between 4 and 6 digits.
+          </small>
+        </label>
+
+        <button class="primary-btn" type="button" [disabled]="loading()" (click)="verifyOtp()">Verify and Continue</button>
+        <button class="ghost-btn" type="button" (click)="step.set('register')">Back</button>
+      </form>
+
+      <small class="status-line">{{ status() }}</small>
+    </section>
+  </section>
+</main>

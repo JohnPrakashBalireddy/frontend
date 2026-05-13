@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+	--bg: #f6f8fb;
+	--surface: #ffffff;
+	--text-primary: #16202b;
+	--muted-text: #637184;
+	--line: #dbe3ec;
+	--brand: #08a874;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	min-height: 100%;
+	font-family: 'Manrope', sans-serif;
+	color: var(--text-primary);
+	background: linear-gradient(180deg, #f5f9ff 0%, #f7fff9 100%);
+}
+
+h1,
+h2,
+h3,
+p {
+	margin: 0;
+}
+
+a {
+	color: #0b8e64;
+	text-decoration: none;
+}
+
+input,
+select,
+textarea {
+	width: 100%;
+	border: 1px solid var(--line);
+	border-radius: 0.7rem;
+	padding: 0.65rem;
+	font: inherit;
+	background: #ffffff;
+}
+
+.card {
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 0.95rem;
+	padding: 1rem;
+	margin-bottom: 0.9rem;
+}
+
+.primary-btn,
+.ghost-btn {
+	border-radius: 0.7rem;
+	padding: 0.65rem 0.9rem;
+	font-weight: 600;
+	font: inherit;
+	cursor: pointer;
+}
+
+.primary-btn {
+	border: none;
+	background: var(--brand);
+	color: #ffffff;
+}
+
+.primary-btn:disabled {
+	opacity: 0.65;
+}
+
+.ghost-btn {
+	border: 1px solid var(--line);
+	background: transparent;
+	color: var(--text-primary);
+}

@@ -1,0 +1,64 @@
+<main class="screen">
+  <app-header title="Admin Profile" subtitle="Manage your account details"></app-header>
+
+  <div *ngIf="error" class="error-banner" role="alert">{{ error }}</div>
+
+  <section class="profile-overview card" *ngIf="authService.sessionSnapshot?.user as user">
+    <div class="profile-avatar">
+      <span>{{ user.fullName.charAt(0) }}</span>
+    </div>
+
+    <div class="profile-info">
+      <div class="profile-heading">
+        <div>
+          <h2>{{ user.fullName }}</h2>
+          <p class="muted">{{ user.email || 'No email on file' }} · Administrator · {{ user.city }}</p>
+        </div>
+        <button type="button" class="logout-btn" (click)="onLogout()">Sign out</button>
+      </div>
+
+      <p class="profile-note">Your admin account has access to approvals, metrics, and system management actions.</p>
+
+      <div class="profile-tags">
+        <span class="tag">{{ user.role }}</span>
+        <span class="tag" *ngIf="user.email">{{ user.email }}</span>
+        <span class="tag">{{ user.mobile }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card details-card" *ngIf="authService.sessionSnapshot?.user as user">
+    <h3>Profile details</h3>
+    <div class="details-grid">
+      <div class="detail-item">
+        <span class="label">Full name</span>
+        <strong>{{ user.fullName }}</strong>
+      </div>
+      <div class="detail-item">
+        <span class="label">Email</span>
+        <strong>{{ user.email || 'Not provided' }}</strong>
+      </div>
+      <div class="detail-item">
+        <span class="label">Mobile</span>
+        <strong>{{ user.mobile }}</strong>
+      </div>
+      <div class="detail-item">
+        <span class="label">City</span>
+        <strong>{{ user.city }}</strong>
+      </div>
+      <div class="detail-item">
+        <span class="label">Role</span>
+        <strong>{{ user.role }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <app-mail-inbox
+    heading="Admin mail"
+    title="Vendor approvals and moderation updates"
+    subtitle="This inbox reflects mail triggered by vendor registrations, approvals and rejections."
+    emptyTitle="No admin notifications yet"
+    emptyMessage="New vendor registrations and system events will appear here as they arrive."
+    [notifications]="notifications"
+  ></app-mail-inbox>
+</main>

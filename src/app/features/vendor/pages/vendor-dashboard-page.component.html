@@ -1,0 +1,143 @@
+<main class="screen">
+  <app-header title="Vendor Dashboard" subtitle="Demand feed and offer management"></app-header>
+
+  <div *ngIf="error()" class="error-banner" role="alert">
+    {{ error() }}
+  </div>
+
+  <section class="hero card">
+    <div class="hero-copy">
+      <p class="eyebrow">Vendor Hub</p>
+      <h2>Track live demand and respond with polished offers.</h2>
+      <p>
+        Review incoming requirements, prepare vehicle details, and keep your active offers organized from one clean workspace.
+      </p>
+    </div>
+
+    <div class="hero-stats" aria-label="Vendor dashboard overview">
+      <div class="stat-tile">
+        <span>Live requirements</span>
+        <strong>{{ demandFeed().length }}</strong>
+      </div>
+      <div class="stat-tile">
+        <span>My offers</span>
+        <strong>{{ myOffers().length }}</strong>
+      </div>
+      <div class="stat-tile stat-tile-highlight" *ngIf="selectedRequirement() as req; else noSelection">
+        <span>Selected requirement</span>
+        <strong>{{ req.vehicleType }}</strong>
+        <small>#{{ req.id }}</small>
+      </div>
+      <ng-template #noSelection>
+        <div class="stat-tile stat-tile-muted">
+          <span>Selected requirement</span>
+          <strong>None</strong>
+          <small>Pick a demand card to prepare an offer</small>
+        </div>
+      </ng-template>
+    </div>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="card panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">Demand Feed</p>
+          <h3>Live requirements</h3>
+        </div>
+        <span class="count-pill">{{ demandFeed().length }}</span>
+      </div>
+
+      <div *ngIf="demandFeed().length === 0" class="empty-state">
+        <p>No live requirements available right now.</p>
+        <span>Check back shortly for fresh demand.</span>
+      </div>
+
+      <div class="item" *ngFor="let req of demandFeed()">
+        <div class="item-main">
+          <strong>{{ req.vehicleType }}</strong>
+          <p class="item-subtitle">{{ req.location }}</p>
+          <div class="item-meta">
+            <span>Rs.{{ req.budgetPerDay }}/day</span>
+            <span>{{ req.startDate }} to {{ req.endDate }}</span>
+          </div>
+          <p class="item-notes">{{ req.notes }}</p>
+        </div>
+
+        <div class="item-action">
+          <button class="ghost-btn" type="button" (click)="chooseRequirement(req)">Send offer</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="card panel panel-sticky" *ngIf="selectedRequirement() as req">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">Offer Builder</p>
+          <h3>Send offer for {{ req.vehicleType }}</h3>
+        </div>
+        <button type="button" class="ghost-btn subtle-btn" (click)="selectedRequirement.set(null)">Clear</button>
+      </div>
+
+      <p class="offer-meta">Requirement ID: {{ req.id }}</p>
+
+      <form [formGroup]="offerForm" class="form-grid">
+        <label>
+          Price/day
+          <input type="number" formControlName="pricePerDay" />
+        </label>
+        <label>
+          Vehicle model
+          <input formControlName="vehicleModel" />
+        </label>
+        <label>
+          Registration number
+          <input formControlName="registrationNumber" />
+        </label>
+        <label>
+          Notes
+          <textarea rows="4" formControlName="notes"></textarea>
+        </label>
+      </form>
+
+      <div class="action-row">
+        <button class="primary-btn" type="button" (click)="submitOffer()">Submit offer</button>
+        <button class="ghost-btn" type="button" (click)="selectedRequirement.set(null)">Cancel</button>
+      </div>
+    </article>
+
+    <article class="card panel panel-empty" *ngIf="!selectedRequirement()">
+      <p class="eyebrow">Offer Builder</p>
+      <h3>Select a requirement to start drafting an offer.</h3>
+      <p>
+        Your selected demand will appear here with the offer form preloaded so you can respond quickly.
+      </p>
+    </article>
+  </section>
+
+  <section class="card panel offers-panel">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">Offer History</p>
+        <h3>My offers</h3>
+      </div>
+      <span class="count-pill">{{ myOffers().length }}</span>
+    </div>
+
+    <div *ngIf="myOffers().length === 0" class="empty-state">
+      <p>No offers yet.</p>
+      <span>Once you submit a response, it will appear here.</span>
+    </div>
+
+    <div class="item offer-item" *ngFor="let offer of myOffers()">
+      <div class="item-main">
+        <strong>{{ offer.vehicleModel }}</strong>
+        <p class="item-subtitle">Requirement ID {{ offer.requirementId }}</p>
+        <div class="item-meta">
+          <span>Rs.{{ offer.pricePerDay }}/day</span>
+          <span class="status-pill">{{ offer.status }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

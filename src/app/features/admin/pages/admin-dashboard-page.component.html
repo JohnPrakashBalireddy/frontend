@@ -1,0 +1,58 @@
+<main class="screen">
+  <app-header title="Admin Dashboard" subtitle="Operational metrics and approvals"></app-header>
+
+  <div *ngIf="error()" style="color: red; padding: 1rem; background: #fee; border-radius: 4px; margin-bottom: 1rem;">
+    {{ error() }}
+  </div>
+
+  <section class="dashboard-graph card">
+    <div class="graph-header">
+      <div>
+        <h2>Performance overview</h2>
+        <p>Select a view to compare day wise, month wise and year wise trends.</p>
+      </div>
+      <div class="range-switch">
+        <button type="button" class="range-btn" [class.active]="selectedRange() === 'day'" (click)="selectedRange.set('day')">Day</button>
+        <button type="button" class="range-btn" [class.active]="selectedRange() === 'month'" (click)="selectedRange.set('month')">Month</button>
+        <button type="button" class="range-btn" [class.active]="selectedRange() === 'year'" (click)="selectedRange.set('year')">Year</button>
+      </div>
+    </div>
+
+    <div class="graph-items">
+      <div class="graph-row" *ngFor="let item of chartData()">
+        <div class="graph-meta">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.value | number }}</strong>
+        </div>
+        <div class="graph-track" aria-hidden="true">
+          <div class="graph-bar" [style.width.%]="(item.value / maxChartValue()) * 100"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-grid">
+    <article class="card"><h3>{{ stats().activeRequirements }}</h3><p>Active requirements</p></article>
+    <article class="card"><h3>{{ stats().offersToday }}</h3><p>Offers today</p></article>
+    <article class="card"><h3>{{ stats().dealsThisWeek }}</h3><p>Deals this week</p></article>
+    <article class="card"><h3>{{ stats().verifiedShops }}</h3><p>Verified shops</p></article>
+  </section>
+
+  <section class="card">
+    <h3>Pending shop approvals</h3>
+    <div *ngIf="pendingShops().length === 0" style="color: #666; padding: 1rem; text-align: center;">
+      No pending approvals
+    </div>
+    <div class="item" *ngFor="let shop of pendingShops()">
+      <div>
+        <strong>{{ shop.shopName || shop.fullName }}</strong>
+        <p>{{ shop.city }} | {{ shop.mobile }}</p>
+      </div>
+
+      <div class="actions">
+        <button class="primary-btn" (click)="approve(shop.id)">Approve</button>
+        <button class="ghost-btn" (click)="reject(shop.id)">Reject</button>
+      </div>
+    </div>
+  </section>
+</main>

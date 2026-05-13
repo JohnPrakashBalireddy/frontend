@@ -1,0 +1,63 @@
+<main class="screen">
+  <app-header title="Offers Received" subtitle="Compare and accept best offer"></app-header>
+
+  <section class="card summary-card">
+    <div>
+      <p class="eyebrow">Requirement</p>
+      <strong class="requirement-id">{{ requirementId() }}</strong>
+      <p class="summary-sub">{{ offers().length }} offer(s) received for this requirement.</p>
+    </div>
+
+    <div class="summary-pill">{{ offers().length }} total</div>
+  </section>
+
+  <div *ngIf="error()" class="error-banner" role="alert">{{ error() }}</div>
+
+  <section class="card accepted-banner" *ngIf="acceptedOfferId()">
+    <strong>Offer accepted successfully.</strong>
+    <p>Vendor contact has been revealed. Continue on WhatsApp or call.</p>
+  </section>
+
+  <section class="card empty-card" *ngIf="loaded() && offers().length === 0">
+    <p>No offers available for this requirement yet.</p>
+    <span>Check back soon for new vendor responses.</span>
+  </section>
+
+  <section class="offer-grid" *ngIf="loaded() && offers().length > 0">
+    <article class="card" *ngFor="let offer of offers()">
+      <header class="offer-head">
+        <div class="price">Rs.{{ offer.pricePerDay }} / day</div>
+        <span class="status-chip" [class.pending]="offer.status === 'pending'" [class.accepted]="offer.status === 'accepted'" [class.rejected]="offer.status === 'rejected'">
+          {{ offer.status | titlecase }}
+        </span>
+      </header>
+
+      <h3>{{ offer.vendorName }}</h3>
+
+      <div class="meta-list">
+        <p><strong>Shop:</strong> {{ offer.vendorAddress || 'N/A' }}</p>
+        <p><strong>Mobile:</strong> {{ offer.vendorMobile || 'N/A' }}</p>
+        <p><strong>Vehicle:</strong> {{ offer.vehicleModel }} | {{ offer.registrationNumber }}</p>
+      </div>
+
+      <p class="notes" *ngIf="offer.notes">{{ offer.notes }}</p>
+
+      <div class="contact-actions">
+        <a class="ghost-btn" [href]="whatsappLink(offer.vendorMobile)" target="_blank" rel="noopener noreferrer">
+          WhatsApp
+        </a>
+        <a class="ghost-btn" [href]="dialLink(offer.vendorMobile)">
+          Call
+        </a>
+      </div>
+
+      <button
+        class="primary-btn"
+        (click)="acceptOffer(offer.id)"
+        [disabled]="offer.status !== 'pending'"
+      >
+        {{ offer.status === 'accepted' ? 'Accepted' : offer.status === 'rejected' ? 'Rejected' : 'Accept' }}
+      </button>
+    </article>
+  </section>
+</main>

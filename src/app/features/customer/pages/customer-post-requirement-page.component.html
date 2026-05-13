@@ -1,0 +1,87 @@
+<main class="screen">
+  <app-header title="Post Requirement" subtitle="Vehicle and budget details"></app-header>
+
+  <section *ngIf="!done" class="form-shell card">
+    <header class="wizard-head">
+      <div>
+        <p class="eyebrow">Requirement Wizard</p>
+        <h2>Create your rental requirement</h2>
+      </div>
+      <p class="step">Step {{ step }} of 3</p>
+    </header>
+
+    <div class="progress-track" aria-hidden="true">
+      <span class="dot" [class.active]="step >= 1"></span>
+      <span class="dot" [class.active]="step >= 2"></span>
+      <span class="dot" [class.active]="step >= 3"></span>
+    </div>
+
+    <form [formGroup]="form" class="form-grid" (ngSubmit)="submit()">
+      <ng-container *ngIf="step === 1">
+        <label>
+          <span>Vehicle Type</span>
+          <select formControlName="vehicleType">
+            <option>Bike</option>
+            <option>Scooty</option>
+            <option>Car</option>
+            <option>SUV</option>
+          </select>
+        </label>
+
+        <div class="split-fields">
+          <label>
+            <span>Start date</span>
+            <input type="date" formControlName="startDate" />
+          </label>
+          <label>
+            <span>End date</span>
+            <input type="date" formControlName="endDate" />
+          </label>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="step === 2">
+        <label>
+          <span>Pickup location</span>
+          <input formControlName="location" />
+        </label>
+
+        <label>
+          <span>Budget/day</span>
+          <input type="number" formControlName="budgetPerDay" />
+        </label>
+
+        <label>
+          <span>Notes</span>
+          <textarea rows="3" formControlName="notes"></textarea>
+        </label>
+      </ng-container>
+
+      <ng-container *ngIf="step === 3">
+        <div class="review-card">
+          <p><strong>Vehicle:</strong> {{ form.value.vehicleType }}</p>
+          <p><strong>Dates:</strong> {{ form.value.startDate }} to {{ form.value.endDate }}</p>
+          <p><strong>Location:</strong> {{ form.value.location }}</p>
+          <p><strong>Budget:</strong> Rs.{{ form.value.budgetPerDay }}/day</p>
+        </div>
+      </ng-container>
+
+      <div class="actions">
+        <button type="button" class="ghost-btn" *ngIf="step > 1" (click)="previousStep()">Back</button>
+        <button type="button" class="primary-btn" *ngIf="step < 3" (click)="nextStep()">Next</button>
+        <button type="submit" class="primary-btn" *ngIf="step === 3">Post Requirement</button>
+      </div>
+    </form>
+  </section>
+
+  <section *ngIf="done" class="card success">
+    <div class="checkmark-animation" aria-hidden="true">
+      <svg viewBox="0 0 52 52" class="checkmark">
+        <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"></circle>
+        <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"></path>
+      </svg>
+    </div>
+    <h3>Requirement posted successfully!</h3>
+    <p>Redirecting to home...</p>
+  </section>
+</main>

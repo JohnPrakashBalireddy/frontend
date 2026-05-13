@@ -1,0 +1,14 @@
+<header class="app-header">
+  <div class="brand-block">
+    <img src="/applogo.jpg" alt="RideOnDemand logo" class="app-logo" />
+
+    <div>
+      <h1>{{ title }}</h1>
+      <p *ngIf="subtitle">{{ subtitle }}</p>
+    </div>
+  </div>
+
+  <button type="button" class="avatar-btn" *ngIf="user" (click)="goToProfile()" title="Open profile">
+    <span class="avatar">{{ (user.fullName || 'U').charAt(0).toUpperCase() }}</span>
+  </button>
+</header>

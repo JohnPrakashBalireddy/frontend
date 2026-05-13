@@ -1,0 +1,17 @@
+.pending-screen {
+  display: grid;
+  place-items: center;
+  min-height: 70vh;
+}
+
+.pending-card {
+  width: min(680px, 92vw);
+  text-align: center;
+}
+
+.actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}

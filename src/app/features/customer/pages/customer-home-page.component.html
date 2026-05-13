@@ -1,0 +1,51 @@
+<main class="screen">
+  <app-header [title]="'Welcome, ' + (authService.sessionSnapshot?.user?.fullName || 'Customer')" subtitle="Post requirements and compare offers"></app-header>
+
+  <div *ngIf="error()" class="error-banner" role="alert">{{ error() }}</div>
+
+  <section class="hero card">
+    <div class="hero-copy">
+      <p class="eyebrow">Quick Start</p>
+      <h2>Need a vehicle?</h2>
+      <p>Post your requirement and nearby shops will send offers tailored to your dates and budget.</p>
+      <div class="hero-actions">
+        <button type="button" class="primary-btn" (click)="goToPost()">Post Requirement</button>
+        <a routerLink="/customer/profile" class="hero-link">Open Profile</a>
+      </div>
+    </div>
+
+    <div class="hero-metric" aria-label="Requirements overview">
+      <p>Active Requirements</p>
+      <strong>{{ activeCount() }}</strong>
+      <span>{{ activeCount() === 1 ? 'active request' : 'active requests' }}</span>
+    </div>
+  </section>
+
+  <section class="card requirements-card">
+    <div class="row-title">
+      <h3>My Requirements</h3>
+      <a routerLink="/customer/profile" class="profile-link">Profile</a>
+    </div>
+
+    <div *ngIf="requirements().length === 0" class="empty-state">
+      <p>No requirements posted yet.</p>
+      <a href="#" (click)="goToPost(); $event.preventDefault();">Post one now</a>
+    </div>
+
+    <div class="item" *ngFor="let requirement of requirements()" (click)="handleCardClick(requirement)" [class.clickable]="requirement.status === 'live' || requirement.status === 'accepted'">
+      <div class="item-main">
+        <strong>{{ requirement.vehicleType }}</strong>
+        <p class="item-subtitle">{{ requirement.location }}</p>
+        <div class="item-meta">
+          <span>Budget Rs.{{ requirement.budgetPerDay }}/day</span>
+          <span>{{ requirement.startDate }} to {{ requirement.endDate }}</span>
+        </div>
+      </div>
+      <div class="item-action">
+        <span *ngIf="requirement.status === 'live'" class="view-arrow">→</span>
+        <span *ngIf="requirement.status === 'accepted'" class="status-badge accepted">Accepted →</span>
+        <span *ngIf="requirement.status === 'completed'" class="status-badge completed">Completed</span>
+      </div>
+    </div>
+  </section>
+</main>

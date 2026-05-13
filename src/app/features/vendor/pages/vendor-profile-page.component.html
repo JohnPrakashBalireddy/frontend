@@ -1,0 +1,64 @@
+<main class="screen">
+  <app-header title="Vendor Profile" subtitle="Manage your profile details"></app-header>
+
+  <div *ngIf="error" class="error-banner" role="alert">{{ error }}</div>
+
+  <section class="profile-overview card" *ngIf="authService.sessionSnapshot?.user as user">
+    <div class="profile-avatar">
+      <span>{{ user.fullName.charAt(0) }}</span>
+    </div>
+
+    <div class="profile-info">
+      <div class="profile-heading">
+        <div>
+          <h2>{{ user.fullName }}</h2>
+          <p class="muted">{{ user.email || 'No email on file' }} · Vendor · {{ user.city }}</p>
+        </div>
+        <button type="button" class="logout-btn" (click)="onLogout()">Sign out</button>
+      </div>
+
+      <p class="profile-note">Your vendor profile helps customers discover your shop and contact you quickly.</p>
+
+      <div class="profile-tags">
+        <span class="tag" *ngIf="user.shopName">{{ user.shopName }}</span>
+        <span class="tag" *ngIf="user.email">{{ user.email }}</span>
+        <span class="tag">{{ user.mobile }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card details-card" *ngIf="authService.sessionSnapshot?.user as user">
+    <h3>Profile details</h3>
+    <div class="details-grid">
+      <div class="detail-item">
+        <span class="label">Full name</span>
+        <strong>{{ user.fullName }}</strong>
+      </div>
+      <div class="detail-item">
+        <span class="label">Email</span>
+        <strong>{{ user.email || 'Not provided' }}</strong>
+      </div>
+      <div class="detail-item">
+        <span class="label">Mobile</span>
+        <strong>{{ user.mobile }}</strong>
+      </div>
+      <div class="detail-item">
+        <span class="label">City</span>
+        <strong>{{ user.city }}</strong>
+      </div>
+      <div class="detail-item" *ngIf="user.shopName">
+        <span class="label">Shop name</span>
+        <strong>{{ user.shopName }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <app-mail-inbox
+    heading="Vendor mail"
+    title="Requirements, offers and approval updates"
+    subtitle="This inbox shows backend mail triggered by vendor approval, new requirements and offer activity."
+    emptyTitle="No vendor notifications yet"
+    emptyMessage="Once an admin approves your profile or a customer posts a requirement, updates will appear here."
+    [notifications]="notifications"
+  ></app-mail-inbox>
+</main>

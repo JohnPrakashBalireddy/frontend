@@ -1,0 +1,48 @@
+<section class="mail-card card">
+  <header class="mail-head">
+    <div>
+      <p class="eyebrow">{{ heading }}</p>
+      <h3>{{ title }}</h3>
+      <p class="mail-subtitle">{{ subtitle }}</p>
+    </div>
+
+    <div class="mail-stats" aria-label="Mail summary">
+      <div>
+        <strong>{{ totalCount }}</strong>
+        <span>{{ itemLabel }}</span>
+      </div>
+      <div>
+        <strong>{{ unreadCount }}</strong>
+        <span>Unread</span>
+      </div>
+    </div>
+  </header>
+
+  <ng-container *ngIf="notifications.length > 0; else emptyState">
+    <article class="mail-item" *ngFor="let notification of notifications" [class.unread]="notification.read === false">
+      <div class="mail-avatar" aria-hidden="true">{{ displayInitial(notification) }}</div>
+
+      <div class="mail-body">
+        <div class="mail-body-head">
+          <strong>{{ displayTitle(notification) }}</strong>
+          <small>{{ notification.createdAt | date: 'medium' }}</small>
+        </div>
+
+        <p>{{ notification.message }}</p>
+
+        <div class="mail-tags" *ngIf="displayType(notification) || notification.read === false">
+          <span class="tag" *ngIf="displayType(notification) as typeLabel">{{ typeLabel }}</span>
+          <span class="tag tag--accent" *ngIf="notification.read === false">Unread</span>
+        </div>
+      </div>
+    </article>
+  </ng-container>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <div class="empty-icon" aria-hidden="true">✉</div>
+      <h4>{{ emptyTitle }}</h4>
+      <p>{{ emptyMessage }}</p>
+    </div>
+  </ng-template>
+</section>
