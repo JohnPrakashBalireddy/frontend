@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://localhost:8081'
+  apiBaseUrl: 'https://rideondemand-version1-1.onrender.com'
 };
 
