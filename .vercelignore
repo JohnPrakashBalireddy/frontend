@@ -1,0 +1,35 @@
+# Development dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build artifacts (will be rebuilt)
+dist/
+
+# Source files (not needed in production)
+.angular/
+src/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+karma.conf.js
+tsconfig.spec.json
+
+# Git
+.git/
+.gitignore
+

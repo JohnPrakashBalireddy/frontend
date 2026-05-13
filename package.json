@@ -7,6 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "build:ssr": "npm run build && npm run build:server",
+    "build:server": "ng build --server",
     "serve:ssr:ride-on-demand": "node dist/ride-on-demand/server/server.mjs"
   },
   "prettier": {
