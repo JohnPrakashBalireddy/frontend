@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { finalize } from 'rxjs';
+import { finalize, switchMap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { Role } from '../../../core/models/role.model';
 
@@ -31,11 +31,9 @@ export class AuthLandingPageComponent implements OnInit {
     [Role.Admin]: 'Admin'
   } as Record<Role, string>;
 
-  readonly step = signal<'register' | 'otp'>('register');
   readonly mode = signal<'register' | 'login'>('register');
   readonly loading = signal(false);
-  readonly otpSessionId = signal('');
-  readonly status = signal('Register and request OTP to continue.');
+  readonly status = signal('Register with password to continue.');
   readonly toastMsg = signal('');
   readonly selectedRole = signal<Role>(this.authService.selectedRole);
 
@@ -43,39 +41,40 @@ export class AuthLandingPageComponent implements OnInit {
     role: this.authService.selectedRole,
     fullName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
     mobile: ['', [Validators.required, Validators.minLength(10)]],
     city: ['', [Validators.required]],
     shopName: ['']
   });
 
-  readonly otpForm = this.fb.nonNullable.group({
-    otp: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(6)]]
+  readonly loginForm = this.fb.nonNullable.group({
+    role: this.authService.selectedRole,
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required]]
   });
 
   selectRole(role: Role): void {
     this.selectedRole.set(role);
     this.registerForm.patchValue({ role });
+    this.loginForm.patchValue({ role });
     this.authService.setSelectedRole(role);
   }
 
   setMode(mode: 'register' | 'login') {
     this.mode.set(mode);
-    this.step.set('register');
     this.clearToast();
     if (mode === 'login') {
-      this.status.set('Login: enter mobile and request OTP to continue.');
+      this.status.set('Login with email and password to continue.');
     } else {
-      this.status.set('Register and request OTP to continue.');
+      this.status.set('Register with password to continue.');
     }
   }
 
-  sendOtp(): void {
-    // Validate differently depending on mode: login only requires mobile; register requires full form
+  submitAuth(): void {
     if (this.mode() === 'login') {
-      const mobileCtrl = this.registerForm.get('mobile');
-      if (!mobileCtrl || mobileCtrl.invalid) {
-        this.registerForm.markAllAsTouched();
-        this.showToast('Enter a valid mobile number to continue.');
+      if (this.loginForm.invalid) {
+        this.loginForm.markAllAsTouched();
+        this.showToast(this.getLoginValidationMessage());
         return;
       }
     } else {
@@ -87,90 +86,76 @@ export class AuthLandingPageComponent implements OnInit {
     }
 
     this.clearToast();
-    const value = this.registerForm.getRawValue();
     this.loading.set(true);
-    // For login mode, directly request OTP. For register mode, register then request OTP.
+
     if (this.mode() === 'login') {
-      this.authService.requestOtp({ mobile: value.mobile, role: value.role }).subscribe({
-        next: (response) => {
-          this.otpSessionId.set(response.otpSessionId);
-          this.step.set('otp');
-          this.status.set(`OTP sent successfully. Session expires at ${response.expiresAt}.`);
-          this.clearToast();
-          this.loading.set(false);
-        },
-        error: (error: unknown) => {
-          const message = this.resolveErrorMessage(error, 'Unable to send OTP. Try again.');
-          this.status.set(message);
-          this.showToast(message);
-          this.loading.set(false);
-        }
-      });
+      const value = this.loginForm.getRawValue();
+      this.authService
+        .login({
+          role: value.role,
+          email: value.email,
+          password: value.password
+        })
+        .pipe(finalize(() => this.loading.set(false)))
+        .subscribe({
+          next: (session) => {
+            this.status.set(`Welcome ${session.user.fullName}`);
+            this.clearToast();
+            this.authService.redirectByRole(session.user.role);
+          },
+          error: (error: unknown) => {
+            const message = this.resolveErrorMessage(error, 'Login failed. Please check your credentials.');
+            this.status.set(message);
+            this.showToast(message);
+          }
+        });
     } else {
+      const value = this.registerForm.getRawValue();
       this.authService
         .register({
           role: value.role,
           fullName: value.fullName,
           email: value.email,
+          password: value.password,
           mobile: value.mobile,
           city: value.city,
           shopName: value.shopName || undefined
         })
+        .pipe(
+          switchMap(() =>
+            this.authService.login({
+              role: value.role,
+              email: value.email,
+              password: value.password
+            })
+          ),
+          finalize(() => this.loading.set(false))
+        )
         .subscribe({
-          next: () => {
-            this.authService.requestOtp({ mobile: value.mobile, role: value.role }).subscribe({
-              next: (response) => {
-                this.otpSessionId.set(response.otpSessionId);
-                this.step.set('otp');
-                this.status.set(`OTP sent successfully. Session expires at ${response.expiresAt}.`);
-                this.clearToast();
-                this.loading.set(false);
-              },
-              error: (error: unknown) => {
-                const message = this.resolveErrorMessage(error, 'Unable to send OTP. Try again.');
-                this.status.set(message);
-                this.showToast(message);
-                this.loading.set(false);
-              }
-            });
+          next: (session) => {
+            this.status.set(`Welcome ${session.user.fullName}`);
+            this.clearToast();
+            this.authService.redirectByRole(session.user.role);
           },
           error: (error: unknown) => {
             const message = this.resolveErrorMessage(error, 'Registration failed. Please try again.');
             this.status.set(message);
             this.showToast(message);
-            this.loading.set(false);
           }
         });
     }
   }
 
-  verifyOtp(): void {
-    if (this.otpForm.invalid || !this.otpSessionId()) {
-      this.otpForm.markAllAsTouched();
-      this.showToast(!this.otpSessionId() ? 'Request OTP first, then verify.' : 'Enter a valid OTP to continue.');
-      return;
+  private getLoginValidationMessage(): string {
+    if (this.loginForm.get('email')?.invalid) {
+      return 'Enter a valid email address to continue.';
     }
 
-    this.clearToast();
-    this.loading.set(true);
-    this.authService
-      .verifyOtp({
-        otpSessionId: this.otpSessionId(),
-        otp: this.otpForm.getRawValue().otp
-      })
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (session) => {
-          this.status.set(`Welcome ${session.user.fullName}`);
-          this.clearToast();
-          this.authService.redirectByRole(session.user.role);
-        },
-        error: (error: unknown) => {
-          const message = this.resolveErrorMessage(error, 'OTP verification failed. Please try again.');
-          this.status.set(message);
-          this.showToast(message);
-        }
-      });
+    if (this.loginForm.get('password')?.invalid) {
+      return 'Enter your password to continue.';
+    }
+
+    return 'Please fill all required fields correctly.';
   }
 
   private getRegisterValidationMessage(): string {
@@ -179,7 +164,11 @@ export class AuthLandingPageComponent implements OnInit {
     }
 
     if (this.registerForm.get('email')?.invalid) {
-      return 'Enter a valid email address to receive OTP and mail updates.';
+      return 'Enter a valid email address to continue.';
+    }
+
+    if (this.registerForm.get('password')?.invalid) {
+      return 'Password must be at least 8 characters.';
     }
 
     if (this.registerForm.get('mobile')?.invalid) {

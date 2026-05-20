@@ -69,7 +69,10 @@
       <div class="actions">
         <button type="button" class="ghost-btn" *ngIf="step > 1" (click)="previousStep()">Back</button>
         <button type="button" class="primary-btn" *ngIf="step < 3" (click)="nextStep()">Next</button>
-        <button type="submit" class="primary-btn" *ngIf="step === 3">Post Requirement</button>
+        <button type="submit" class="primary-btn" *ngIf="step === 3" [disabled]="submitting()">
+          <span *ngIf="submitting()" class="btn-spinner"></span>
+          {{ submitting() ? 'Posting…' : 'Post Requirement' }}
+        </button>
       </div>
     </form>
   </section>

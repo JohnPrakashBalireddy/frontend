@@ -13,6 +13,14 @@
 
   <div *ngIf="error()" class="error-banner" role="alert">{{ error() }}</div>
 
+  <!-- Skeleton while loading -->
+  <div *ngIf="!loaded()" class="skeleton-wrap" aria-busy="true" aria-label="Loading offers">
+    <div class="skeleton skeleton-summary"></div>
+    <div class="offer-grid">
+      <div class="skeleton skeleton-card" *ngFor="let i of [1,2,3]"></div>
+    </div>
+  </div>
+
   <section class="card accepted-banner" *ngIf="acceptedOfferId()">
     <strong>Offer accepted successfully.</strong>
     <p>Vendor contact has been revealed. Continue on WhatsApp or call.</p>
@@ -54,9 +62,20 @@
       <button
         class="primary-btn"
         (click)="acceptOffer(offer.id)"
-        [disabled]="offer.status !== 'pending'"
+        [disabled]="offer.status !== 'pending' || actionLoadingId() === offer.id"
       >
-        {{ offer.status === 'accepted' ? 'Accepted' : offer.status === 'rejected' ? 'Rejected' : 'Accept' }}
+        <span *ngIf="actionLoadingId() === offer.id" class="btn-spinner"></span>
+        {{ actionLoadingId() === offer.id ? 'Processing…' : (offer.status === 'accepted' ? 'Accepted' : offer.status === 'rejected' ? 'Rejected' : 'Accept') }}
+      </button>
+
+      <button
+        class="danger-btn"
+        (click)="rejectOffer(offer.id)"
+        [disabled]="offer.status !== 'pending' || actionLoadingId() === offer.id"
+        *ngIf="offer.status === 'pending'"
+      >
+        <span *ngIf="actionLoadingId() === offer.id" class="btn-spinner"></span>
+        {{ actionLoadingId() === offer.id ? 'Processing…' : 'Reject' }}
       </button>
     </article>
   </section>

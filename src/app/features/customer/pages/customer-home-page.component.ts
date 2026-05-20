@@ -18,16 +18,20 @@ export class CustomerHomePageComponent implements OnInit {
   readonly requirements = signal<Requirement[]>([]);
   readonly activeCount = computed(() => this.requirements().filter((r) => r.status === 'live').length);
   readonly error = signal('');
+  readonly loading = signal(true);
 
   ngOnInit(): void {
+    this.loading.set(true);
     this.customerApi.listRequirements().subscribe({
       next: (requirements) => {
         console.log('Customer requirements loaded:', requirements);
         this.requirements.set(requirements);
+        this.loading.set(false);
       },
       error: (err) => {
         console.error('Error loading requirements:', err);
         this.error.set('Failed to load requirements');
+        this.loading.set(false);
       }
     });
   }

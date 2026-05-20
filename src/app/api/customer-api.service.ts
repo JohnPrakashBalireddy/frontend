@@ -36,6 +36,12 @@ export class CustomerApiService {
       .pipe(map((item) => mapRequirement(item)));
   }
 
+  rejectOffer(offerId: string | number): Observable<Offer> {
+    return this.http
+      .post<BackendOffer>(`${this.baseUrl}/offers/${offerId}/reject`, {})
+      .pipe(map((item) => mapOffer(item)));
+  }
+
   listNotifications(): Observable<ActivityNotification[]> {
     return this.http.get<BackendNotification[]>(`${this.baseUrl}/notifications`).pipe(
       map((items) =>

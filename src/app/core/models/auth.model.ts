@@ -24,24 +24,17 @@ export interface UserSession {
 export interface RegisterPayload {
   fullName: string;
   email: string;
+  password: string;
   mobile: string;
   city: string;
   role: Role;
   shopName?: string;
 }
 
-export interface RequestOtpPayload {
-  mobile: string;
+export interface LoginPayload {
+  email: string;
+  password: string;
   role: Role;
 }
 
-export interface VerifyOtpPayload {
-  otpSessionId: string;
-  otp: string;
-}
-
-export interface OtpRequestResponse {
-  otpSessionId: string;
-  expiresAt: string;
-}
 

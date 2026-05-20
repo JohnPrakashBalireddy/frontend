@@ -19,6 +19,10 @@ export class VendorDashboardPageComponent implements OnInit {
   readonly myOffers = signal<Offer[]>([]);
   readonly selectedRequirement = signal<Requirement | null>(null);
   readonly error = signal('');
+  readonly loadingFeed = signal(true);
+  readonly loadingOffers = signal(true);
+  readonly submittingOffer = signal(false);
+  readonly cancellingOfferId = signal<string | number | null>(null);
 
   readonly offerForm = this.fb.nonNullable.group({
     pricePerDay: [350, [Validators.required, Validators.min(100)]],
@@ -41,6 +45,7 @@ export class VendorDashboardPageComponent implements OnInit {
     }
 
     const value = this.offerForm.getRawValue();
+    this.submittingOffer.set(true);
     this.vendorApi
       .submitOffer({
         requirementId: this.selectedRequirement()!.id,
@@ -51,23 +56,46 @@ export class VendorDashboardPageComponent implements OnInit {
       })
       .subscribe({
         next: () => {
+          this.submittingOffer.set(false);
           this.selectedRequirement.set(null);
           this.loadData();
         },
         error: (err) => {
           console.error('Error submitting offer:', err);
           this.error.set('Failed to submit offer');
+          this.submittingOffer.set(false);
         }
       });
   }
 
+  cancelOffer(offerId: string | number): void {
+    if (!confirm('Are you sure you want to withdraw this offer?')) {
+      return;
+    }
+    this.cancellingOfferId.set(offerId);
+    this.vendorApi.cancelOffer(offerId).subscribe({
+      next: () => {
+        this.cancellingOfferId.set(null);
+        this.loadData();
+      },
+      error: (err) => {
+        console.error('Error withdrawing offer:', err);
+        this.error.set('Failed to withdraw offer');
+        this.cancellingOfferId.set(null);
+      }
+    });
+  }
+
   private loadData(): void {
     this.error.set('');
-    
+    this.loadingFeed.set(true);
+    this.loadingOffers.set(true);
+
     this.vendorApi.listDemandFeed().subscribe({
       next: (feed) => {
         console.log('Demand feed loaded:', feed);
         this.demandFeed.set(feed);
+        this.loadingFeed.set(false);
       },
       error: (err) => {
         if (this.redirectIfApprovalRequired(err)) {
@@ -75,6 +103,7 @@ export class VendorDashboardPageComponent implements OnInit {
         }
         console.error('Error loading demand feed:', err);
         this.error.set('Failed to load demand feed');
+        this.loadingFeed.set(false);
       }
     });
 
@@ -82,6 +111,7 @@ export class VendorDashboardPageComponent implements OnInit {
       next: (offers) => {
         console.log('Vendor offers loaded:', offers);
         this.myOffers.set(offers);
+        this.loadingOffers.set(false);
       },
       error: (err) => {
         if (this.redirectIfApprovalRequired(err)) {
@@ -89,6 +119,7 @@ export class VendorDashboardPageComponent implements OnInit {
         }
         console.error('Error loading vendor offers:', err);
         this.error.set('Failed to load vendor offers');
+        this.loadingOffers.set(false);
       }
     });
   }

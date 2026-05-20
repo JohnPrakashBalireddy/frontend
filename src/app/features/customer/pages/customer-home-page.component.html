@@ -3,7 +3,15 @@
 
   <div *ngIf="error()" class="error-banner" role="alert">{{ error() }}</div>
 
-  <section class="hero card">
+  <!-- Loading skeleton -->
+  <div *ngIf="loading()" class="skeleton-wrap" aria-busy="true" aria-label="Loading requirements">
+    <div class="skeleton skeleton-hero"></div>
+    <div class="skeleton-list">
+      <div class="skeleton skeleton-item" *ngFor="let i of [1,2,3]"></div>
+    </div>
+  </div>
+
+  <section class="hero card" *ngIf="!loading()">
     <div class="hero-copy">
       <p class="eyebrow">Quick Start</p>
       <h2>Need a vehicle?</h2>
@@ -21,7 +29,7 @@
     </div>
   </section>
 
-  <section class="card requirements-card">
+  <section class="card requirements-card" *ngIf="!loading()">
     <div class="row-title">
       <h3>My Requirements</h3>
       <a routerLink="/customer/profile" class="profile-link">Profile</a>

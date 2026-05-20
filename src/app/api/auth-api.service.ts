@@ -2,12 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import {
-  OtpRequestResponse,
+  LoginPayload,
   RegisterPayload,
-  RequestOtpPayload,
   User,
-  UserSession,
-  VerifyOtpPayload
+  UserSession
 } from '../core/models/auth.model';
 import { Role } from '../core/models/role.model';
 import { environment } from '../../environments/environment';
@@ -29,16 +27,12 @@ export class AuthApiService {
       .pipe(map((user) => mapUser(user)));
   }
 
-  requestOtp(payload: RequestOtpPayload): Observable<OtpRequestResponse> {
-    return this.http.post<OtpRequestResponse>(`${this.baseUrl}/auth/request-otp`, {
+  login(payload: LoginPayload): Observable<UserSession> {
+    return this.http
+      .post<LoginResponse>(`${this.baseUrl}/auth/login`, {
       ...payload,
       role: toBackendRole(payload.role)
-    });
-  }
-
-  verifyOtp(payload: VerifyOtpPayload): Observable<UserSession> {
-    return this.http
-      .post<VerifyOtpResponse>(`${this.baseUrl}/auth/verify-otp`, payload)
+      })
       .pipe(
         map((response) => ({
           accessToken: response.accessToken,
@@ -68,7 +62,7 @@ interface BackendUser {
   updatedAt?: string;
 }
 
-interface VerifyOtpResponse {
+interface LoginResponse {
   accessToken: string;
   refreshToken?: string;
   user: BackendUser;

@@ -48,26 +48,33 @@
         <span class="count-pill">{{ demandFeed().length }}</span>
       </div>
 
-      <div *ngIf="demandFeed().length === 0" class="empty-state">
+      <!-- Demand feed skeleton -->
+      <div *ngIf="loadingFeed()" class="skeleton-list" aria-busy="true" aria-label="Loading demand feed">
+        <div class="skeleton skeleton-item" *ngFor="let i of [1,2,3]"></div>
+      </div>
+
+      <div *ngIf="!loadingFeed() && demandFeed().length === 0" class="empty-state">
         <p>No live requirements available right now.</p>
         <span>Check back shortly for fresh demand.</span>
       </div>
 
-      <div class="item" *ngFor="let req of demandFeed()">
-        <div class="item-main">
-          <strong>{{ req.vehicleType }}</strong>
-          <p class="item-subtitle">{{ req.location }}</p>
-          <div class="item-meta">
-            <span>Rs.{{ req.budgetPerDay }}/day</span>
-            <span>{{ req.startDate }} to {{ req.endDate }}</span>
+      <ng-container *ngIf="!loadingFeed()">
+        <div class="item" *ngFor="let req of demandFeed()">
+          <div class="item-main">
+            <strong>{{ req.vehicleType }}</strong>
+            <p class="item-subtitle">{{ req.location }}</p>
+            <div class="item-meta">
+              <span>Rs.{{ req.budgetPerDay }}/day</span>
+              <span>{{ req.startDate }} to {{ req.endDate }}</span>
+            </div>
+            <p class="item-notes">{{ req.notes }}</p>
           </div>
-          <p class="item-notes">{{ req.notes }}</p>
-        </div>
 
-        <div class="item-action">
-          <button class="ghost-btn" type="button" (click)="chooseRequirement(req)">Send offer</button>
+          <div class="item-action">
+            <button class="ghost-btn" type="button" (click)="chooseRequirement(req)">Send offer</button>
+          </div>
         </div>
-      </div>
+      </ng-container>
     </article>
 
     <article class="card panel panel-sticky" *ngIf="selectedRequirement() as req">
@@ -101,7 +108,10 @@
       </form>
 
       <div class="action-row">
-        <button class="primary-btn" type="button" (click)="submitOffer()">Submit offer</button>
+        <button class="primary-btn" type="button" [disabled]="submittingOffer()" (click)="submitOffer()">
+          <span *ngIf="submittingOffer()" class="btn-spinner"></span>
+          {{ submittingOffer() ? 'Submitting…' : 'Submit offer' }}
+        </button>
         <button class="ghost-btn" type="button" (click)="selectedRequirement.set(null)">Cancel</button>
       </div>
     </article>
@@ -124,20 +134,35 @@
       <span class="count-pill">{{ myOffers().length }}</span>
     </div>
 
-    <div *ngIf="myOffers().length === 0" class="empty-state">
+    <!-- My offers skeleton -->
+    <div *ngIf="loadingOffers()" class="skeleton-list" aria-busy="true" aria-label="Loading offers">
+      <div class="skeleton skeleton-item" *ngFor="let i of [1,2]"></div>
+    </div>
+
+    <div *ngIf="!loadingOffers() && myOffers().length === 0" class="empty-state">
       <p>No offers yet.</p>
       <span>Once you submit a response, it will appear here.</span>
     </div>
 
-    <div class="item offer-item" *ngFor="let offer of myOffers()">
-      <div class="item-main">
-        <strong>{{ offer.vehicleModel }}</strong>
-        <p class="item-subtitle">Requirement ID {{ offer.requirementId }}</p>
-        <div class="item-meta">
-          <span>Rs.{{ offer.pricePerDay }}/day</span>
-          <span class="status-pill">{{ offer.status }}</span>
+    <ng-container *ngIf="!loadingOffers()">
+      <div class="item offer-item" *ngFor="let offer of myOffers()">
+        <div class="item-main">
+          <strong>{{ offer.vehicleModel }}</strong>
+          <p class="item-subtitle">Requirement ID {{ offer.requirementId }}</p>
+          <div class="item-meta">
+            <span>Rs.{{ offer.pricePerDay }}/day</span>
+            <span class="status-pill" [class.status-pending]="offer.status === 'pending'" [class.status-accepted]="offer.status === 'accepted'" [class.status-rejected]="offer.status === 'rejected'">
+              {{ offer.status | titlecase }}
+            </span>
+          </div>
+        </div>
+        <div class="item-action" *ngIf="offer.status === 'pending'">
+          <button class="danger-btn" type="button" [disabled]="cancellingOfferId() === offer.id" (click)="cancelOffer(offer.id)">
+            <span *ngIf="cancellingOfferId() === offer.id" class="btn-spinner"></span>
+            {{ cancellingOfferId() === offer.id ? 'Withdrawing…' : 'Withdraw' }}
+          </button>
         </div>
       </div>
-    </div>
+    </ng-container>
   </section>
 </main>

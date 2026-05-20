@@ -1,3 +1,19 @@
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;`
+  animation: spin 0.65s linear infinite;
+  margin-right: 0.4em;
+  vertical-align: middle;
+}
+
 .screen {
   max-width: 56rem;
   margin: 0 auto;

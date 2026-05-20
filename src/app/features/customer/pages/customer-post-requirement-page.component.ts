@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CustomerApiService } from '../../../api/customer-api.service';
@@ -17,6 +17,7 @@ export class CustomerPostRequirementPageComponent {
   step = 1;
   done = false;
   createdRequirementId: string | number | null = null;
+  readonly submitting = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     vehicleType: ['Bike', Validators.required],
@@ -41,6 +42,7 @@ export class CustomerPostRequirementPageComponent {
       return;
     }
 
+    this.submitting.set(true);
     const value = this.form.getRawValue();
     this.customerApi
       .postRequirement({
@@ -51,12 +53,19 @@ export class CustomerPostRequirementPageComponent {
         budgetPerDay: Number(value.budgetPerDay),
         notes: value.notes
       })
-      .subscribe((created) => {
-        this.done = true;
-        this.createdRequirementId = created.id;
-        setTimeout(() => {
-          void this.router.navigate(['/customer']);
-        }, 2000);
+      .subscribe({
+        next: (created) => {
+          this.submitting.set(false);
+          this.done = true;
+          this.createdRequirementId = created.id;
+          setTimeout(() => {
+            void this.router.navigate(['/customer']);
+          }, 2000);
+        },
+        error: (err) => {
+          console.error('Error posting requirement:', err);
+          this.submitting.set(false);
+        }
       });
   }
 

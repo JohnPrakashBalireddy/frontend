@@ -47,6 +47,12 @@ export class VendorApiService {
       .pipe(map((response) => response.content.map((item) => mapOffer(item))));
   }
 
+  cancelOffer(offerId: string | number): Observable<Offer> {
+    return this.http
+      .post<BackendOffer>(`${this.baseUrl}/offers/${offerId}/cancel`, {})
+      .pipe(map((item) => mapOffer(item)));
+  }
+
 }
 
 interface BackendRequirement {

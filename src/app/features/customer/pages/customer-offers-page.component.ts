@@ -20,6 +20,7 @@ export class CustomerOffersPageComponent implements OnInit {
   readonly acceptedOfferId = signal<string | number | null>(null);
   readonly error = signal('');
   readonly loaded = signal(false);
+  readonly actionLoadingId = signal<string | number | null>(null);
 
   ngOnInit(): void {
     this.requirementId.set(this.route.snapshot.paramMap.get('requirementId') ?? '');
@@ -27,16 +28,37 @@ export class CustomerOffersPageComponent implements OnInit {
   }
 
   acceptOffer(offerId: string | number): void {
+    this.actionLoadingId.set(offerId);
     this.customerApi.acceptOffer(offerId).subscribe({
       next: (accepted) => {
         if (accepted) {
           this.acceptedOfferId.set(accepted.acceptedOfferId ?? offerId);
         }
+        this.actionLoadingId.set(null);
         this.loadOffers(false);
       },
       error: (err) => {
         console.error('Error accepting offer:', err);
         this.error.set('Failed to accept offer');
+        this.actionLoadingId.set(null);
+      }
+    });
+  }
+
+  rejectOffer(offerId: string | number): void {
+    if (!confirm('Are you sure you want to reject this offer?')) {
+      return;
+    }
+    this.actionLoadingId.set(offerId);
+    this.customerApi.rejectOffer(offerId).subscribe({
+      next: () => {
+        this.actionLoadingId.set(null);
+        this.loadOffers(false);
+      },
+      error: (err) => {
+        console.error('Error rejecting offer:', err);
+        this.error.set('Failed to reject offer');
+        this.actionLoadingId.set(null);
       }
     });
   }

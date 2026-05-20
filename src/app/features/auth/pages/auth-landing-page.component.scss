@@ -1,3 +1,19 @@
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  margin-right: 0.4em;
+  vertical-align: middle;
+}
+
 .auth-layout {
   min-height: 100dvh;
   padding: clamp(1rem, 2.5vw, 2rem);

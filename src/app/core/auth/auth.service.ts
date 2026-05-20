@@ -3,12 +3,10 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { AuthApiService } from '../../api/auth-api.service';
 import {
-  OtpRequestResponse,
+  LoginPayload,
   RegisterPayload,
-  RequestOtpPayload,
   User,
-  UserSession,
-  VerifyOtpPayload
+  UserSession
 } from '../models/auth.model';
 import { Role } from '../models/role.model';
 
@@ -49,17 +47,8 @@ export class AuthService {
     return this.authApi.register(payload);
   }
 
-  requestOtp(payload: RequestOtpPayload): Observable<OtpRequestResponse> {
-    return this.authApi.requestOtp(payload);
-  }
-
-  verifyOtp(payload: VerifyOtpPayload): Observable<UserSession> {
-    return this.authApi.verifyOtp(payload).pipe(
-      tap((session) => {
-        this.sessionSubject.next(session);
-        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
-      })
-    );
+  login(payload: LoginPayload): Observable<UserSession> {
+    return this.authApi.login(payload).pipe(tap((session) => this.persistSession(session)));
   }
 
   updateSessionUser(user: User): void {
@@ -101,5 +90,10 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  private persistSession(session: UserSession): void {
+    this.sessionSubject.next(session);
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
   }
 }
